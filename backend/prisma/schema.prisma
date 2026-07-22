@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Channel {
+  ouvidoria
+  sac
+  suporte_tecnico
+  financeiro
+  fora_do_escopo
+}
+
+enum Status {
+  aberto
+  em_atendimento
+  resolvido
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tickets   Ticket[]
+
+  @@map("users")
+}
+
+model Ticket {
+  id        String   @id @default(uuid())
+  message   String
+  channel   Channel
+  status    Status   @default(aberto)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tickets")
+}
