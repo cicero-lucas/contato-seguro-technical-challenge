@@ -1,0 +1,111 @@
+@baseUrl = http://localhost:3000/api
+@token = SEU_TOKEN_AQUI
+
+### Health Check
+GET http://localhost:3000/health
+
+### ==================== AUTH ====================
+
+### Registrar usuário
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Lucas Silva",
+  "email": "lucas@email.com",
+  "password": "senha123"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "lucas@email.com",
+  "password": "senha123"
+}
+
+### Meu perfil
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### ==================== USERS ====================
+
+### Listar usuários
+GET {{baseUrl}}/users
+
+### Buscar usuário por ID
+GET {{baseUrl}}/users/ID_DO_USUARIO
+
+### Criar usuário
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Maria Souza",
+  "email": "maria@email.com",
+  "password": "senha123"
+}
+
+### Atualizar usuário
+PUT {{baseUrl}}/users/ID_DO_USUARIO
+Content-Type: application/json
+
+{
+  "name": "Maria Souza Atualizada"
+}
+
+### ==================== TICKETS ====================
+
+### Listar tickets
+GET {{baseUrl}}/tickets
+Authorization: Bearer {{token}}
+
+### Buscar ticket por ID
+GET {{baseUrl}}/tickets/ID_DO_TICKET
+Authorization: Bearer {{token}}
+
+### Criar ticket - suporte técnico
+POST {{baseUrl}}/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "Não consigo fazer login no sistema, aparece erro de acesso"
+}
+
+### Criar ticket - ouvidoria
+POST {{baseUrl}}/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "Quero registrar uma denúncia de assédio"
+}
+
+### Criar ticket - financeiro
+POST {{baseUrl}}/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "Recebi uma cobrança indevida no meu cartão"
+}
+
+### Criar ticket - sac
+POST {{baseUrl}}/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "Meu produto chegou com defeito na entrega"
+}
+
+### Atualizar status do ticket
+PATCH {{baseUrl}}/tickets/ID_DO_TICKET/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "em_atendimento"
+}
