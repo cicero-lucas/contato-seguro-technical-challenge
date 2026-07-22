@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.env
+*.log
+
+.git/
+.gitignore
+
+tests/
+README.md
+api.http
+
+.claude/
+.windsurf/
+.agents/
+skills-lock.json
