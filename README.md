@@ -145,8 +145,8 @@ cp .env.example .env
 
 ```bash
 # 1. Clone o repositório
-git clone <url-do-repositorio>
-cd projetoNode
+git clone https://github.com/cicero-lucas/contato-seguro-technical-challenge
+cd contato-seguro-technical-challenge
 
 # 2. Configure as variáveis de ambiente
 cp .env.example .env
