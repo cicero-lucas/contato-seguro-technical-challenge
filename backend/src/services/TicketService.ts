@@ -1,4 +1,4 @@
-import { Status } from "@prisma/client";
+import { Priority, Status } from "@prisma/client";
 import { TicketRepository } from "../repositories/TicketRepository";
 import { UserRepository } from "../repositories/UserRepository";
 import { ClassificationService } from "./ClassificationService";
@@ -26,11 +26,12 @@ export class TicketService {
     const user = await this.userRepository.findById(data.userId);
     if (!user) throw new AppError("Usuário não encontrado", 404);
 
-    const { channel } = await this.classificationService.classify(data.message);
+    const { channel, priority } = await this.classificationService.classify(data.message);
 
     return this.ticketRepository.create({
       message: data.message,
       channel,
+      priority,
       userId: data.userId,
     });
   }

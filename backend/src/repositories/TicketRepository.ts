@@ -1,5 +1,5 @@
 import prisma from "../config/prisma";
-import { Channel, Status } from "@prisma/client";
+import { Channel, Priority, Status } from "@prisma/client";
 
 export class TicketRepository {
   async findAll() {
@@ -16,7 +16,7 @@ export class TicketRepository {
     });
   }
 
-  async create(data: { message: string; channel: Channel; userId: string }) {
+  async create(data: { message: string; channel: Channel; priority: Priority; userId: string }) {
     return prisma.ticket.create({
       data,
       include: { user: { select: { id: true, name: true, email: true } } },
