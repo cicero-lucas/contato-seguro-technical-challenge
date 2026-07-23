@@ -36,11 +36,12 @@ describe("Tickets", () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
     expect(res.body).toHaveProperty("channel");
+    expect(res.body).toHaveProperty("priority");
     expect(res.body.status).toBe("aberto");
     ticketId = res.body.id;
   });
 
-  it("POST /tickets - deve classificar como ouvidoria para denúncia", async () => {
+  it("POST /tickets - deve classificar como ouvidoria/ALTA para denúncia", async () => {
     const res = await request(app)
       .post(baseUrl)
       .set("Authorization", `Bearer ${token}`)
@@ -48,9 +49,10 @@ describe("Tickets", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.channel).toBe("ouvidoria");
+    expect(res.body.priority).toBe("ALTA");
   });
 
-  it("POST /tickets - deve classificar como financeiro para cobrança", async () => {
+  it("POST /tickets - deve classificar como financeiro/MEDIA para cobrança", async () => {
     const res = await request(app)
       .post(baseUrl)
       .set("Authorization", `Bearer ${token}`)
@@ -58,9 +60,10 @@ describe("Tickets", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.channel).toBe("financeiro");
+    expect(res.body.priority).toBe("MEDIA");
   });
 
-  it("POST /tickets - deve classificar como sac para problema com produto", async () => {
+  it("POST /tickets - deve classificar como sac/BAIXA para problema com produto", async () => {
     const res = await request(app)
       .post(baseUrl)
       .set("Authorization", `Bearer ${token}`)
@@ -68,6 +71,7 @@ describe("Tickets", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.channel).toBe("sac");
+    expect(res.body.priority).toBe("BAIXA");
   });
 
   it("POST /tickets - deve retornar 401 sem autenticação", async () => {
