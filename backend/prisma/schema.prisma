@@ -15,6 +15,12 @@ enum Channel {
   fora_do_escopo
 }
 
+enum Priority {
+  ALTA
+  MEDIA
+  BAIXA
+}
+
 enum Status {
   aberto
   em_atendimento
@@ -37,6 +43,7 @@ model Ticket {
   id        String   @id @default(uuid())
   message   String
   channel   Channel
+  priority  Priority
   status    Status   @default(aberto)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
