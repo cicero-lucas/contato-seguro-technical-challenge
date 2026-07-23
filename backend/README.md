@@ -1,16 +1,26 @@
-# Triagem API
+# Triagem API — Backend
 
-API REST profissional para triagem de atendimentos com classificação automática de tickets via Inteligência Artificial (Google Gemini).
-
----
-
-## Objetivo
-
-Permitir o cadastro de usuários, criação e consulta de tickets de atendimento, com classificação automática do canal de atendimento utilizando IA, além de autenticação JWT e testes automatizados completos.
+API REST para triagem de atendimentos com classificação automática de tickets por IA.
 
 ---
 
-## Tecnologias Utilizadas
+## Sumário
+
+- [Tecnologias](#tecnologias)
+- [Arquitetura](#arquitetura)
+- [Estrutura de Pastas](#estrutura-de-pastas)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Executando com Docker](#executando-com-docker)
+- [Executando Localmente](#executando-localmente)
+- [Migrations e Seed](#migrations-e-seed)
+- [Endpoints e Exemplos](#endpoints-e-exemplos)
+- [Classificação Automática](#classificação-automática)
+- [Testes](#testes)
+- [Decisões Técnicas](#decisões-técnicas)
+
+---
+
+## Tecnologias
 
 | Categoria         | Tecnologia                 |
 | ----------------- | -------------------------- |
@@ -25,43 +35,44 @@ Permitir o cadastro de usuários, criação e consulta de tickets de atendimento
 | Logs              | Pino + pino-http           |
 | Documentação    | Swagger (OpenAPI 3.0)      |
 | Testes            | Jest + Supertest           |
-| Containerização | Docker + Docker Compose    |
+| Containerização | Docker                     |
 | Segurança        | Helmet + CORS + Rate Limit |
 
 ---
 
 ## Arquitetura
 
-O projeto segue **Arquitetura em Camadas (Layered Architecture)** com os princípios **SOLID** e **Repository Pattern**.
+Arquitetura em camadas com Repository Pattern e princípios SOLID.
 
 ```
 HTTP Request
      ↓
-  Routes
+  Routes          ← define endpoints e aplica middlewares
      ↓
- Controller        ← sem regras de negócio
+Controller        ← recebe a requisição, delega ao service, retorna resposta
      ↓
-  Service          ← toda regra de negócio aqui
+ Service          ← toda a regra de negócio fica aqui
      ↓
- Repository        ← exclusivamente comunicação com banco
+Repository        ← abstrai as queries do Prisma
      ↓
-   Prisma
+  Prisma
      ↓
- PostgreSQL
+PostgreSQL
 ```
 
 **Responsabilidades por camada:**
 
-- `routes/` — define os endpoints e aplica middlewares
-- `controllers/` — recebe a requisição, delega ao service, retorna a resposta
-- `services/` — contém toda a lógica de negócio
-- `repositories/` — abstrai as queries do Prisma
-- `middlewares/` — autenticação, tratamento de erros, async handler
-- `validations/` — schemas Zod para validação de entrada
-- `interfaces/` — contratos TypeScript (DTOs e interfaces de serviço)
-- `config/` — configurações de ambiente, logger e Prisma client
-- `utils/` — utilitários reutilizáveis (AppError, excludePassword)
-- `docs/` — configuração do Swagger
+| Camada            | Responsabilidade                                       |
+| ----------------- | ------------------------------------------------------ |
+| `routes/`       | Define endpoints e aplica middlewares                  |
+| `controllers/`  | Recebe requisição, valida entrada, delega ao service |
+| `services/`     | Regras de negócio, orquestração entre repositórios |
+| `repositories/` | Queries ao banco via Prisma                            |
+| `middlewares/`  | Auth JWT, tratamento de erros, async handler           |
+| `validations/`  | Schemas Zod para validação de entrada                |
+| `interfaces/`   | Contratos TypeScript (DTOs e interfaces)               |
+| `config/`       | Env, logger e Prisma client                            |
+| `utils/`        | AppError, excludePassword                              |
 
 ---
 
@@ -70,7 +81,9 @@ HTTP Request
 ```
 backend/
 ├── prisma/
-│   └── schema.prisma
+│   ├── migrations/
+│   ├── schema.prisma
+│   └── seed.ts
 ├── src/
 │   ├── config/
 │   │   ├── env.ts
@@ -122,10 +135,8 @@ backend/
 │   │   └── users.test.ts
 │   └── unit/
 │       └── classification.test.ts
-├── .env
 ├── .env.example
 ├── api.http
-├── docker-compose.yml
 ├── Dockerfile
 ├── jest.config.ts
 ├── package.json
@@ -136,18 +147,22 @@ backend/
 
 ## Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto com base no `.env.example`:
+Crie o arquivo `.env` com base no `.env.example`:
+
+```bash
+cp .env.example .env
+```
 
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/triagem_db"
+DATABASE_URL="postgresql://triagem_user:senha@localhost:5432/triagem_db"
 
 # JWT
-JWT_SECRET="sua_chave_secreta_aqui"
+JWT_SECRET="seu_jwt_secret_longo_aqui"
 JWT_EXPIRES_IN="7d"
 
-# Google Gemini
-GEMINI_API_KEY="sua_gemini_api_key_aqui"
+# Google Gemini (opcional)
+GEMINI_API_KEY="sua_gemini_api_key"
 
 # App
 PORT=3000
@@ -158,149 +173,119 @@ RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX=100
 ```
 
-> A `GEMINI_API_KEY` é opcional. Se não configurada, o sistema usa automaticamente o fallback por palavras-chave.
+> Sem `GEMINI_API_KEY`, o sistema usa classificação por palavras-chave automaticamente.
 
 ---
 
-## Instalação
+## Executando com Docker
+
+> O `docker-compose.yml` fica na raiz do projeto. Execute os comandos a partir da raiz.
 
 ```bash
-# Clonar o repositório
-git clone <url-do-repositorio>
-cd backend
+# Sobe banco + API + frontend
+docker compose up --build
 
-# Instalar dependências
-npm install
+# Sobe apenas o banco (para desenvolvimento local)
+docker compose up -d postgres
 
-# Configurar variáveis de ambiente
-cp .env.example .env
-# edite o .env com suas configurações
+# Para os containers
+docker compose down
+
+# Para e remove os dados do banco
+docker compose down -v
 ```
 
+Na primeira execução, o container da API automaticamente:
+
+1. Aplica as migrations (`prisma migrate deploy`)
+2. Popula o banco com seed
+3. Inicia o servidor
+
 ---
 
-## Docker
-
-### Subir toda a aplicação (API + PostgreSQL)
+## Executando Localmente
 
 ```bash
-docker compose up --build
+# 1. Suba o banco a partir da raiz do projeto
+docker compose up -d postgres
+
+# 2. Entre na pasta do backend
+cd backend
+
+# 3. Instale as dependências
+npm install
+
+# 4. Configure o .env
+cp .env.example .env
+# Ajuste DATABASE_URL para: postgresql://triagem_user:senha@localhost:5432/triagem_db
+
+# 5. Aplique as migrations
+npm run prisma:migrate
+
+# 6. Popule o banco
+npm run prisma:seed
+
+# 7. Inicie em modo desenvolvimento (hot reload)
+npm run dev
 ```
 
 A API estará disponível em `http://localhost:3000`.
 
-### Subir apenas o banco (para desenvolvimento local)
+**Scripts disponíveis:**
 
-```bash
-docker compose up -d postgres
-```
+| Script                     | Descrição                         |
+| -------------------------- | ----------------------------------- |
+| `npm run dev`            | Inicia com hot reload (ts-node-dev) |
+| `npm run build`          | Compila TypeScript para`dist/`    |
+| `npm start`              | Inicia a versão compilada          |
+| `npm test`               | Roda todos os testes                |
+| `npm run test:coverage`  | Testes com relatório de cobertura  |
+| `npm run prisma:migrate` | Cria e aplica migrations            |
+| `npm run prisma:seed`    | Popula o banco com dados de exemplo |
+| `npm run prisma:studio`  | Abre o Prisma Studio (GUI do banco) |
 
 ---
 
-## Migrations do Prisma
+## Migrations e Seed
 
 ```bash
-# Criar e aplicar migration (desenvolvimento)
+# Aplicar migrations (desenvolvimento)
 npm run prisma:migrate
 
-# Apenas gerar o Prisma Client
-npm run prisma:generate
-
-# Abrir o Prisma Studio
-npm run prisma:studio
+# Rodar o seed manualmente
+npm run prisma:seed
 ```
 
-Em produção (via Docker), as migrations são aplicadas automaticamente no startup do container.
+**Dados criados pelo seed:**
+
+Usuários (senha: `senha123`): `admin@email.com`, `joao@email.com`, `maria@email.com`
+
+9 tickets cobrindo todos os canais (`ouvidoria`, `suporte_tecnico`, `financeiro`, `sac`, `fora_do_escopo`), prioridades (`ALTA`, `MEDIA`, `BAIXA`) e status (`aberto`, `em_atendimento`, `resolvido`).
 
 ---
 
-## Como Executar
+## Endpoints e Exemplos
 
-### Desenvolvimento
+### GET /health
 
-```bash
-npm run dev
+```http
+GET http://localhost:3000/health
 ```
 
-### Produção
+**Resposta 200:**
 
-```bash
-npm run build
-npm start
-```
-
----
-
-## Como Rodar os Testes
-
-Os testes de integração requerem o PostgreSQL rodando.
-
-```bash
-# Subir o banco
-docker compose up -d postgres
-
-# Aplicar migrations
-npm run prisma:migrate
-
-# Rodar todos os testes
-npm test
-
-# Rodar com cobertura
-npm run test:coverage
-```
-
-**Resultado esperado:**
-
-```
-Test Suites: 4 passed, 4 total
-Tests:       33 passed, 33 total
+```json
+{ "status": "ok", "timestamp": "2024-01-01T00:00:00.000Z" }
 ```
 
 ---
-
-## Endpoints
-
-### Health Check
-
-| Método | Rota        | Descrição   | Auth |
-| ------- | ----------- | ------------- | ---- |
-| GET     | `/health` | Status da API | Não |
-
-### Auth
-
-| Método | Rota                   | Descrição                   | Auth |
-| ------- | ---------------------- | ----------------------------- | ---- |
-| POST    | `/api/auth/register` | Registrar usuário            | Não |
-| POST    | `/api/auth/login`    | Login                         | Não |
-| GET     | `/api/auth/me`       | Dados do usuário autenticado | Sim  |
-
-### Users
-
-| Método | Rota               | Descrição            | Auth |
-| ------- | ------------------ | ---------------------- | ---- |
-| GET     | `/api/users`     | Listar usuários       | Não |
-| GET     | `/api/users/:id` | Buscar usuário por ID | Não |
-| POST    | `/api/users`     | Criar usuário         | Não |
-| PUT     | `/api/users/:id` | Atualizar usuário     | Não |
-
-### Tickets
-
-| Método | Rota                        | Descrição                                | Auth |
-| ------- | --------------------------- | ------------------------------------------ | ---- |
-| GET     | `/api/tickets`            | Listar tickets                             | Sim  |
-| GET     | `/api/tickets/:id`        | Buscar ticket por ID                       | Sim  |
-| POST    | `/api/tickets`            | Criar ticket (classificação automática) | Sim  |
-| PATCH   | `/api/tickets/:id/status` | Atualizar status                           | Sim  |
-
----
-
-## Exemplos de Requisição e Resposta
 
 ### POST /api/auth/register
 
-**Request:**
+```http
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
 
-```json
 {
   "name": "Lucas Silva",
   "email": "lucas@email.com",
@@ -308,7 +293,7 @@ Tests:       33 passed, 33 total
 }
 ```
 
-**Response 201:**
+**Resposta 201:**
 
 ```json
 {
@@ -317,57 +302,149 @@ Tests:       33 passed, 33 total
     "id": "uuid",
     "name": "Lucas Silva",
     "email": "lucas@email.com",
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
+    "createdAt": "2024-01-01T00:00:00.000Z"
   }
 }
 ```
 
+---
+
 ### POST /api/auth/login
 
-**Request:**
+```http
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
 
-```json
 {
-  "email": "lucas@email.com",
+  "email": "admin@email.com",
   "password": "senha123"
 }
 ```
 
-**Response 200:**
+**Resposta 200:**
 
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": "uuid",
-    "name": "Lucas Silva",
-    "email": "lucas@email.com"
+    "name": "Admin",
+    "email": "admin@email.com"
   }
 }
 ```
 
-### POST /api/tickets
+---
 
-**Request:**
+### GET /api/auth/me
+
+```http
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer <token>
+```
+
+**Resposta 200:**
 
 ```json
+{
+  "id": "uuid",
+  "name": "Admin",
+  "email": "admin@email.com",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+---
+
+### GET /api/users
+
+```http
+GET http://localhost:3000/api/users
+```
+
+**Resposta 200:**
+
+```json
+[
+  { "id": "uuid", "name": "Admin", "email": "admin@email.com" },
+  { "id": "uuid", "name": "João Silva", "email": "joao@email.com" }
+]
+```
+
+---
+
+### POST /api/users
+
+```http
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Maria Souza",
+  "email": "maria@email.com",
+  "password": "senha123"
+}
+```
+
+**Resposta 201:**
+
+```json
+{
+  "id": "uuid",
+  "name": "Maria Souza",
+  "email": "maria@email.com",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+---
+
+### PUT /api/users/:id
+
+```http
+PUT http://localhost:3000/api/users/<id>
+Content-Type: application/json
+
+{
+  "name": "Maria Souza Atualizada"
+}
+```
+
+**Resposta 200:**
+
+```json
+{
+  "id": "uuid",
+  "name": "Maria Souza Atualizada",
+  "email": "maria@email.com"
+}
+```
+
+---
+
+### POST /api/tickets
+
+```http
+POST http://localhost:3000/api/tickets
+Authorization: Bearer <token>
+Content-Type: application/json
+
 {
   "message": "Não consigo fazer login no sistema, aparece erro de acesso"
 }
 ```
 
-**Response 201:**
+**Resposta 201:**
 
 ```json
 {
   "id": "uuid",
   "message": "Não consigo fazer login no sistema, aparece erro de acesso",
   "channel": "suporte_tecnico",
+  "priority": "MEDIA",
   "status": "aberto",
   "userId": "uuid",
   "createdAt": "2024-01-01T00:00:00.000Z",
-  "updatedAt": "2024-01-01T00:00:00.000Z",
   "user": {
     "id": "uuid",
     "name": "Lucas Silva",
@@ -376,157 +453,149 @@ Tests:       33 passed, 33 total
 }
 ```
 
+Outros exemplos de classificação:
+
+| Mensagem                                    | Canal          | Prioridade |
+| ------------------------------------------- | -------------- | ---------- |
+| "Quero registrar uma denúncia de assédio" | ouvidoria      | ALTA       |
+| "Recebi uma cobrança indevida no cartão"  | financeiro     | MEDIA      |
+| "Meu produto chegou com defeito"            | sac            | BAIXA      |
+| "Olá, tudo bem?"                           | fora_do_escopo | BAIXA      |
+
+---
+
 ### PATCH /api/tickets/:id/status
 
-**Request:**
+```http
+PATCH http://localhost:3000/api/tickets/<id>/status
+Authorization: Bearer <token>
+Content-Type: application/json
 
-```json
 {
   "status": "em_atendimento"
 }
 ```
 
-**Response 200:**
+**Resposta 200:**
 
 ```json
 {
   "id": "uuid",
   "status": "em_atendimento",
   "channel": "suporte_tecnico",
-  ...
+  "priority": "MEDIA"
 }
 ```
 
-### Resposta de erro (422 - Validação)
+Status válidos: `aberto`, `em_atendimento`, `resolvido`
+
+---
+
+### Respostas de Erro
+
+**400 — Dados inválidos (Zod):**
 
 ```json
 {
   "status": "error",
   "message": "Dados inválidos",
-  "errors": [
-    {
-      "field": "email",
-      "message": "Invalid email"
-    }
-  ]
+  "errors": [{ "field": "email", "message": "Invalid email" }]
 }
 ```
 
-### Resposta de erro (401 - Não autorizado)
+**401 — Não autorizado:**
 
 ```json
-{
-  "status": "error",
-  "message": "Token não fornecido"
-}
+{ "status": "error", "message": "Token não fornecido" }
+```
+
+**404 — Não encontrado:**
+
+```json
+{ "status": "error", "message": "Ticket não encontrado" }
+```
+
+**409 — Conflito:**
+
+```json
+{ "status": "error", "message": "E-mail já cadastrado" }
 ```
 
 ---
 
-## Fluxo da Aplicação
+## Classificação Automática
 
-### Criação de Ticket com Classificação por IA
+O `ClassificationService` é responsável por classificar cada mensagem.
+
+**Fluxo:**
 
 ```
-1. Usuário autenticado envia POST /api/tickets com { message }
-2. TicketController valida a mensagem via Zod
-3. TicketService verifica se o usuário existe
-4. TicketService chama ClassificationService.classify(message)
-5. ClassificationService envia o prompt ao Google Gemini
-6. Gemini retorna o canal em JSON: { "channel": "suporte_tecnico" }
-7. Se Gemini falhar → fallback por palavras-chave
-8. TicketRepository persiste o ticket com o canal classificado
-9. Ticket retornado com status "aberto" e canal definido
+classify(message)
+      ↓
+GEMINI_API_KEY configurada?
+   ↙ sim              ↘ não
+Chama Gemini      classifyByKeywords()
+      ↓
+Gemini retornou JSON válido?
+   ↙ sim              ↘ não
+Retorna           classifyByKeywords()
+channel + priority
 ```
+
+**Fallback por palavras-chave** — normaliza acentos e detecta variações:
+
+| Palavras detectadas                                    | Canal           | Prioridade |
+| ------------------------------------------------------ | --------------- | ---------- |
+| denúncia, fraude, assédio, abuso, discriminação... | ouvidoria       | ALTA       |
+| erro, bug, login, senha, travou, bloqueado...          | suporte_tecnico | MEDIA      |
+| cobrança, pagamento, reembolso, boleto...             | financeiro      | MEDIA      |
+| produto, entrega, pedido, troca, assinatura...         | sac             | BAIXA      |
+| qualquer outra mensagem                                | fora_do_escopo  | BAIXA      |
 
 ---
 
-## Prompt Utilizado para IA
+## Testes
 
-```
-Você é um classificador de tickets.
-Sua função é classificar mensagens em apenas um canal.
-Responda SOMENTE neste formato JSON:
-{"channel":"suporte_tecnico"}
+```bash
+# Suba o banco (a partir da raiz do projeto)
+docker compose up -d postgres
 
-Os únicos valores permitidos são:
-ouvidoria
-sac
-suporte_tecnico
-financeiro
-fora_do_escopo
+# Aplique as migrations
+npm run prisma:migrate
 
-Critérios:
-Denúncia, fraude ou assédio → ouvidoria
-Produto, entrega ou assinatura → sac
-Erro, bug, login, acesso ou indisponibilidade → suporte_tecnico
-Cobrança, pagamento ou reembolso → financeiro
-Qualquer outro assunto → fora_do_escopo
+# Rode todos os testes
+npm test
 
-Nunca escreva explicações.
-Nunca utilize Markdown.
-Nunca escreva comentários.
-Responder somente JSON válido.
+# Com cobertura
+npm run test:coverage
 ```
 
-### Fallback por Palavras-chave
+**Resultado esperado:**
 
-Quando o Gemini está indisponível ou não configurado, o sistema classifica automaticamente por palavras-chave:
+```
+Test Suites: 4 passed, 4 total
+Tests:       55 passed, 55 total
+```
 
-| Palavras-chave                              | Canal           |
-| ------------------------------------------- | --------------- |
-| denúncia, fraude, assédio                 | ouvidoria       |
-| produto, entrega, assinatura                | sac             |
-| erro, bug, login, acesso, indisponibilidade | suporte_tecnico |
-| cobrança, pagamento, reembolso             | financeiro      |
-| qualquer outra mensagem                     | fora_do_escopo  |
+| Suite                      | Tipo         | O que cobre                                                             |
+| -------------------------- | ------------ | ----------------------------------------------------------------------- |
+| `classification.test.ts` | Unitário    | 30 casos — todos os canais, prioridades e variações de mensagem      |
+| `auth.test.ts`           | Integração | Register, login, token inválido, /me autenticado                       |
+| `users.test.ts`          | Integração | CRUD completo, e-mail duplicado, validações                           |
+| `tickets.test.ts`        | Integração | Criação, classificação por canal, listagem, atualização de status |
 
 ---
 
-## Decisões Arquiteturais
+## Decisões Técnicas
 
-**Arquitetura em Camadas com Repository Pattern**
-Garante separação de responsabilidades, facilita testes unitários com mocks e permite trocar o ORM sem impactar a lógica de negócio.
+**Fallback de IA** — Se o Gemini falhar ou não estiver configurado, o sistema degrada graciosamente para palavras-chave, garantindo que todo ticket sempre seja classificado.
 
-**ClassificationService isolado**
-O TicketService não conhece detalhes do Gemini. A dependência é injetada via interface `IClassificationService`, respeitando o princípio de inversão de dependência (SOLID - D).
+**asyncHandler** — Wrapper que captura erros assíncronos e os encaminha ao middleware global, eliminando try/catch repetitivo nos controllers.
 
-**Fallback automático de IA**
-Se a GEMINI_API_KEY não estiver configurada ou o serviço estiver indisponível, o sistema degrada graciosamente para classificação por palavras-chave, garantindo disponibilidade.
+**AppError** — Classe de erro customizada com `statusCode`, permitindo diferenciar erros de negócio (4xx) de erros inesperados (5xx) no middleware global.
 
-**asyncHandler**
-Wrapper que captura erros assíncronos e os encaminha ao middleware de erro global, eliminando try/catch repetitivo nos controllers.
+**excludePassword** — Função utilitária que remove o campo `password` de todas as respostas, garantindo que a senha nunca seja exposta.
 
-**AppError**
-Classe de erro customizada com statusCode, permitindo que o middleware de erro global trate erros de negócio e erros inesperados de forma diferenciada.
+**NODE_ENV=test** — Desativa o logger HTTP do Pino durante os testes para manter o output limpo.
 
-**Senha nunca retornada**
-A função `excludePassword` garante que o campo `password` seja removido de todas as respostas que envolvem dados de usuário.
-
-**NODE_ENV=test desativa o logger HTTP**
-O pino-http é desativado durante os testes para manter o output limpo.
-
----
-
-## Diferenciais Implementados
-
-- **Google Gemini API** — classificação automática de tickets com IA generativa
-- **Fallback inteligente** — classificação por palavras-chave quando a IA está indisponível
-- **JWT + bcrypt** — autenticação segura com senha criptografada
-- **Swagger** — documentação interativa disponível em `/api-docs`
-- **Docker + Docker Compose** — ambiente completo containerizado
-- **Pino** — logging estruturado de alta performance
-- **Helmet + CORS + Rate Limit** — camadas de segurança em produção
-- **Zod** — validação com mensagens de erro padronizadas
-- **33 testes automatizados** — cobertura completa de integração e unitária
-- **Arquivo `.http`** — coleção de requisições prontas para uso no VS Code (REST Client)
-
----
-
-## Documentação Interativa
-
-Com a API rodando, acesse:
-
-```
-http://localhost:3000/api-docs
-```
+**Prisma seed** — Dados de exemplo populados automaticamente no startup do container, facilitando avaliação e testes manuais.

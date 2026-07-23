@@ -1,12 +1,12 @@
 @baseUrl = http://localhost:3000/api
 @token = SEU_TOKEN_AQUI
 
-### Health Check
+# Health Check
 GET http://localhost:3000/health
 
-### ==================== AUTH ====================
+#AUTH
 
-### Registrar usuário
+# Registrar usuário
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -16,7 +16,7 @@ Content-Type: application/json
   "password": "senha123"
 }
 
-### Login
+# Login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -25,19 +25,19 @@ Content-Type: application/json
   "password": "senha123"
 }
 
-### Meu perfil
+# Meu perfil
 GET {{baseUrl}}/auth/me
 Authorization: Bearer {{token}}
 
-### ==================== USERS ====================
+# USERS
 
-### Listar usuários
+# Listar usuários
 GET {{baseUrl}}/users
 
-### Buscar usuário por ID
+# Buscar usuário por ID
 GET {{baseUrl}}/users/ID_DO_USUARIO
 
-### Criar usuário
+# Criar usuário
 POST {{baseUrl}}/users
 Content-Type: application/json
 
@@ -47,7 +47,7 @@ Content-Type: application/json
   "password": "senha123"
 }
 
-### Atualizar usuário
+# Atualizar usuário
 PUT {{baseUrl}}/users/ID_DO_USUARIO
 Content-Type: application/json
 
@@ -55,17 +55,17 @@ Content-Type: application/json
   "name": "Maria Souza Atualizada"
 }
 
-### ==================== TICKETS ====================
+#TICKETS 
 
-### Listar tickets
+# Listar tickets
 GET {{baseUrl}}/tickets
 Authorization: Bearer {{token}}
 
-### Buscar ticket por ID
+#Buscar ticket por ID
 GET {{baseUrl}}/tickets/ID_DO_TICKET
 Authorization: Bearer {{token}}
 
-### Criar ticket - suporte técnico
+# Criar ticket - suporte técnico
 POST {{baseUrl}}/tickets
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -74,7 +74,7 @@ Content-Type: application/json
   "message": "Não consigo fazer login no sistema, aparece erro de acesso"
 }
 
-### Criar ticket - ouvidoria
+# Criar ticket - ouvidoria
 POST {{baseUrl}}/tickets
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -83,7 +83,7 @@ Content-Type: application/json
   "message": "Quero registrar uma denúncia de assédio"
 }
 
-### Criar ticket - financeiro
+# Criar ticket - financeiro
 POST {{baseUrl}}/tickets
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -92,7 +92,7 @@ Content-Type: application/json
   "message": "Recebi uma cobrança indevida no meu cartão"
 }
 
-### Criar ticket - sac
+# Criar ticket - sac
 POST {{baseUrl}}/tickets
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -101,7 +101,7 @@ Content-Type: application/json
   "message": "Meu produto chegou com defeito na entrega"
 }
 
-### Atualizar status do ticket
+# Atualizar status do ticket
 PATCH {{baseUrl}}/tickets/ID_DO_TICKET/status
 Authorization: Bearer {{token}}
 Content-Type: application/json
