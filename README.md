@@ -1,6 +1,5 @@
 # Triagem API
 
-
 <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
   <img src="https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white" height="24" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" height="24" />
@@ -20,7 +19,6 @@
   <img src="https://img.shields.io/badge/CORS-00599C?logo=cloudflare&logoColor=white" height="24" />
   <img src="https://img.shields.io/badge/Rate_Limit-FF6B35?logo=shield&logoColor=white" height="24" />
 </div>
-
 
 API REST para triagem de atendimentos com classificação automática de tickets por Inteligência Artificial (Google Gemini) e fallback inteligente por palavras-chave.
 
@@ -590,6 +588,19 @@ Ao criar um ticket, o sistema classifica automaticamente a mensagem em um canal 
 Os testes de integração requerem o PostgreSQL rodando.
 
 > **Importante:** os scripts do backend carregam o `.env` da raiz automaticamente via `dotenv-cli`. Não é necessário criar um `.env` dentro de `backend/`. Use sempre `npm run prisma:migrate` e não `npx prisma migrate dev` diretamente.
+
+### Opção 1 — Via Docker (sem instalar nada localmente)
+
+Com a aplicação já rodando via `docker compose up`, execute os testes dentro do container:
+
+```bash
+docker compose exec api npm test
+
+# Com relatório de cobertura
+docker compose exec api npm run test:coverage
+```
+
+### Opção 2 — Localmente
 
 ```bash
 # 1. Na raiz, suba o banco
