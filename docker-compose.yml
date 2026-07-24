@@ -19,6 +19,22 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: triagem_postgres_test
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: triagem_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d triagem_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ./backend
@@ -29,6 +45,7 @@ services:
       - "${PORT}:3000"
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      DATABASE_URL_TEST: postgresql://${DB_USER}:${DB_PASSWORD}@postgres_test:5432/triagem_test
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
@@ -38,6 +55,8 @@ services:
       RATE_LIMIT_MAX: ${RATE_LIMIT_MAX}
     depends_on:
       postgres:
+        condition: service_healthy
+      postgres_test:
         condition: service_healthy
 
   frontend:

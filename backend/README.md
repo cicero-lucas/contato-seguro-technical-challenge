@@ -70,6 +70,8 @@ backend/
 
 **NODE_ENV=test** — Desativa o logger HTTP do Pino durante os testes para manter o output limpo.
 
+**Banco de dados isolado para testes** — Os testes de integração fazem `deleteMany()` no `beforeAll`/`afterAll` para garantir um estado limpo entre as suites. Para evitar que isso apague dados do banco de desenvolvimento/produção (`triagem_db`), foi adicionado um serviço `postgres_test` separado no `docker-compose.yml` (porta `5433`, banco `triagem_test`). A variável `DATABASE_URL_TEST` é exposta ao container da API e, quando presente, o `tests/setup.ts` a usa para sobrescrever o `DATABASE_URL` antes do Prisma inicializar — garantindo que todos os `deleteMany()` dos testes afetem apenas o banco de teste.
+
 **Prisma seed** — Dados de exemplo populados automaticamente no startup do container, facilitando avaliação e testes manuais.
 
 **Prisma 6 (não 7)** — O projeto usa Prisma v6 intencionalmente. O Prisma 7 foi lançado recentemente e introduz breaking changes significativos: a configuração via `package.json#prisma` foi removida em favor de um arquivo `prisma.config.ts`, e diversas APIs internas foram alteradas. Como o v7 ainda é muito recente e o ecossistema de integrações (Jest, ts-node-dev, Docker) ainda não foi amplamente validado com ele, optou-se pelo v6 por ser estável, maduro e sem riscos de regressão durante o desenvolvimento deste projeto.
