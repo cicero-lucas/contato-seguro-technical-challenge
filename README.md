@@ -144,8 +144,10 @@ cp .env.example .env
 | `JWT_SECRET`     | Chave secreta para assinar tokens JWT | —                            |
 | `JWT_EXPIRES_IN` | Tempo de expiração do token         | `7d`                        |
 | `GEMINI_API_KEY` | Chave da API do Google Gemini         | opcional                      |
-| `GEMINI_MODEL`   | Modelo do Gemini a ser utilizado      | `gemini-3-flash-preview`    |
-| `VITE_API_URL`   | URL da API consumida pelo frontend    | `http://localhost:3000/api` |
+| `GEMINI_MODEL`          | Modelo do Gemini a ser utilizado      | `gemini-3-flash-preview`    |
+| `RATE_LIMIT_WINDOW_MS`  | Janela de tempo do rate limit (ms)    | `900000`                    |
+| `RATE_LIMIT_MAX`        | Máximo de requisições por janela     | `100`                       |
+| `VITE_API_URL`          | URL da API consumida pelo frontend    | `http://localhost:3000/api` |
 
 > `GEMINI_API_KEY` é opcional. Sem ela, o sistema usa classificação por palavras-chave automaticamente.
 
@@ -241,24 +243,26 @@ docker compose down -v
 # 1. Na raiz do projeto, suba apenas o banco
 docker compose up -d postgres
 
-# 2. Entre na pasta do backend
-cd backend
-
-# 3. Instale as dependências
-npm install
-
-# 4. Configure o .env do backend
+# 2. Configure as variáveis de ambiente (na raiz do projeto)
 cp .env.example .env
 ```
 
-Edite o `backend/.env` e ajuste a `DATABASE_URL` para apontar para localhost:
+Edite o `.env` na raiz e ajuste os valores:
 
 ```env
+DB_PASSWORD=sua_senha
+JWT_SECRET=seu_jwt_secret
 DATABASE_URL="postgresql://triagem_user:sua_senha@localhost:5432/triagem_db"
 ```
 
 ```bash
-# 5. Aplique as migrations
+# 3. Entre na pasta do backend
+cd backend
+
+# 4. Instale as dependências
+npm install
+
+# 5. Aplique as migrations (carrega o .env da raiz automaticamente)
 npm run prisma:migrate
 
 # 6. Popule o banco com dados de seed
@@ -591,7 +595,7 @@ Os testes de integração requerem o PostgreSQL rodando.
 
 ### Opção 1 — Via Docker (sem instalar nada localmente)
 
-Com a aplicação já rodando via `docker compose up`, execute os testes dentro do container:
+Com a aplicação rodando via `docker compose up` (que já sobe o `postgres_test` automaticamente), execute os testes dentro do container:
 
 ```bash
 docker compose exec api npm test
@@ -603,8 +607,8 @@ docker compose exec api npm run test:coverage
 ### Opção 2 — Localmente
 
 ```bash
-# 1. Na raiz, suba o banco
-docker compose up -d postgres
+# 1. Na raiz, suba o banco principal e o banco de testes
+docker compose up -d postgres postgres_test
 
 # 2. Entre no backend
 cd backend
@@ -621,6 +625,8 @@ npm test
 # Com relatório de cobertura
 npm run test:coverage
 ```
+
+> Os testes usam automaticamente o banco `triagem_test` (porta `5433`) via variável `DATABASE_URL_TEST`, mantendo o banco principal intacto.
 
 **Resultado esperado:**
 
