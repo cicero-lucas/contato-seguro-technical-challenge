@@ -2,6 +2,8 @@
 
 Interface web para visualização e gerenciamento de tickets de atendimento, consumindo a Triagem API.
 
+![Demonstração da aplicação](../.github/assets/demo.gif)
+
 ---
 
 ## Sumário
