@@ -11,6 +11,7 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  setupFiles: ["<rootDir>/tests/setup.ts"],
   clearMocks: true,
   collectCoverageFrom: ["src/**/*.ts", "!src/server.ts", "!src/docs/**"],
   coverageDirectory: "coverage",
