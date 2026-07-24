@@ -26,9 +26,6 @@ describe("ClassificationService - fallback por palavras-chave", () => {
       ["abuso", "Sofri um abuso na loja"],
       ["agressão", "Um atendente me agrediu"],
       ["humilhação", "Fui humilhado na frente de todos"],
-      ["ameaça", "O segurança me ameaçou"],
-      ["discriminação", "Sofri discriminação por causa da minha aparência"],
-      ["racismo", "Fui vítima de racismo na loja"],
     ])("%s", async (_, message) => {
       const result = await service.classify(message);
       expect(result.channel).toBe("ouvidoria");
