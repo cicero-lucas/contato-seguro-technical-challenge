@@ -1,3 +1,5 @@
+name: triagem
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -50,6 +52,27 @@ services:
       - "80:80"
     depends_on:
       - api
+
+  info:
+    image: alpine
+    container_name: triagem_info
+    depends_on:
+      - frontend
+    command: >
+      sh -c "
+        sleep 4 &&
+        echo '' &&
+        echo '========================================' &&
+        echo '  Triagem API - Servicos disponiveis' &&
+        echo '========================================' &&
+        echo '  API:          http://localhost:3000' &&
+        echo '  Swagger:      http://localhost:3000/api-docs' &&
+        echo '  Frontend:     http://localhost:80' &&
+        echo '  Health Check: http://localhost:3000/health' &&
+        echo '========================================' &&
+        echo ''
+      "
+    restart: "no"
 
 volumes:
   postgres_data:
