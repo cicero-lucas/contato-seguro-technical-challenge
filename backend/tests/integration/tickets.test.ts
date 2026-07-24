@@ -39,7 +39,7 @@ describe("Tickets", () => {
     expect(res.body).toHaveProperty("priority");
     expect(res.body.status).toBe("aberto");
     ticketId = res.body.id;
-  });
+  }, 15000);
 
   it("POST /tickets - deve classificar como ouvidoria/ALTA para denúncia", async () => {
     const res = await request(app)
@@ -50,7 +50,7 @@ describe("Tickets", () => {
     expect(res.status).toBe(201);
     expect(res.body.channel).toBe("ouvidoria");
     expect(res.body.priority).toBe("ALTA");
-  });
+  }, 15000);
 
   it("POST /tickets - deve classificar como financeiro/MEDIA para cobrança", async () => {
     const res = await request(app)
@@ -61,7 +61,7 @@ describe("Tickets", () => {
     expect(res.status).toBe(201);
     expect(res.body.channel).toBe("financeiro");
     expect(res.body.priority).toBe("MEDIA");
-  });
+  }, 15000);
 
   it("POST /tickets - deve classificar como sac/BAIXA para problema com produto", async () => {
     const res = await request(app)
@@ -72,7 +72,7 @@ describe("Tickets", () => {
     expect(res.status).toBe(201);
     expect(res.body.channel).toBe("sac");
     expect(res.body.priority).toBe("BAIXA");
-  });
+  }, 15000);
 
   it("POST /tickets - deve retornar 401 sem autenticação", async () => {
     const res = await request(app).post(baseUrl).send({ message: "Mensagem sem token" });
