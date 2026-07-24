@@ -1,11 +1,26 @@
 # Triagem API
 
-![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
-![Jest](<https://img.shields.io/badge/Tests-55%20passed-C21325?logo=jest&logoColor=white>)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+
+<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+  <img src="https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Express-000000?logo=express&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/bcrypt-4A4A4A?logo=securityscorecard&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Zod-3E67B1?logo=zod&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Google_Gemini-4285F4?logo=google-gemini&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Pino-F9A825?logo=javascript&logoColor=black" height="24" />
+  <img src="https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black" height="24" />
+  <img src="https://img.shields.io/badge/Jest-C21325?logo=jest&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Docker_Compose-2496ED?logo=docker&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Helmet-000000?logo=helmet&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/CORS-00599C?logo=cloudflare&logoColor=white" height="24" />
+  <img src="https://img.shields.io/badge/Rate_Limit-FF6B35?logo=shield&logoColor=white" height="24" />
+</div>
+
 
 API REST para triagem de atendimentos com classificação automática de tickets por Inteligência Artificial (Google Gemini) e fallback inteligente por palavras-chave.
 
