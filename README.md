@@ -1,5 +1,12 @@
 # Triagem API
 
+![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Jest](https://img.shields.io/badge/Tests-55%20passed-C21325?logo=jest&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 API REST para triagem de atendimentos com classificação automática de tickets por Inteligência Artificial (Google Gemini) e fallback inteligente por palavras-chave.
 
 ---
@@ -12,6 +19,7 @@ API REST para triagem de atendimentos com classificação automática de tickets
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Pré-requisitos](#pré-requisitos)
 - [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Modelo de IA](#modelo-de-ia)
 - [Como Rodar com Docker](#como-rodar-com-docker)
 - [Como Rodar Localmente](#como-rodar-localmente)
 - [Dados de Seed](#dados-de-seed)
@@ -20,12 +28,16 @@ API REST para triagem de atendimentos com classificação automática de tickets
 - [Testes](#testes)
 - [Documentação Interativa](#documentação-interativa)
 - [Deploy na AWS](#deploy-na-aws)
+- [Autor](#autor)
+- [Licença](#licença)
 
 ---
 
 ## Visão Geral
 
 O sistema permite que usuários autenticados abram tickets de atendimento enviando uma mensagem de texto. A mensagem é automaticamente classificada em um canal (`ouvidoria`, `suporte_tecnico`, `financeiro`, `sac`, `fora_do_escopo`) e recebe uma prioridade (`ALTA`, `MEDIA`, `BAIXA`) via Google Gemini. Caso a IA esteja indisponível, um fallback por palavras-chave garante que a classificação sempre ocorra.
+
+![Demonstração da aplicação](./.github/assets/demo.gif)
 
 ---
 
@@ -53,28 +65,14 @@ O sistema permite que usuários autenticados abram tickets de atendimento envian
 
 O projeto segue arquitetura em camadas com Repository Pattern e princípios SOLID.
 
-```
-HTTP Request
-     ↓
-  Routes          ← define endpoints e middlewares
-     ↓
-Controller        ← recebe requisição, delega ao service
-     ↓
- Service          ← toda regra de negócio
-     ↓
-Repository        ← abstrai queries do Prisma
-     ↓
-  Prisma
-     ↓
-PostgreSQL
-```
+![Arquitetura do Projeto](./.github/assets/arquitetura_projeto.png)
 
 ---
 
 ## Estrutura do Projeto
 
 ```
-projetoNode/
+contato-seguro-technical-challenge/
 ├── backend/
 │   ├── prisma/
 │   │   ├── migrations/
@@ -133,9 +131,44 @@ cp .env.example .env
 | `JWT_SECRET`     | Chave secreta para assinar tokens JWT | —                            |
 | `JWT_EXPIRES_IN` | Tempo de expiração do token         | `7d`                        |
 | `GEMINI_API_KEY` | Chave da API do Google Gemini         | opcional                      |
+| `GEMINI_MODEL`   | Modelo do Gemini a ser utilizado      | `gemini-3-flash-preview`    |
 | `VITE_API_URL`   | URL da API consumida pelo frontend    | `http://localhost:3000/api` |
 
 > `GEMINI_API_KEY` é opcional. Sem ela, o sistema usa classificação por palavras-chave automaticamente.
+
+---
+
+## Modelo de IA
+
+O sistema utiliza a **Google Gemini API** para classificar automaticamente as mensagens dos tickets.
+
+### Modelo utilizado
+
+Por padrão o modelo configurado é o `gemini-3-flash-preview`, definido via variável de ambiente `GEMINI_MODEL`. Você pode trocar para qualquer modelo disponível na sua chave sem alterar o código.
+
+| Modelo | Velocidade | Custo |
+| --- | --- | --- |
+| `gemini-3-flash-preview` | Rápido | Baixo |
+| `gemini-2.0-flash` | Rápido | Baixo |
+| `gemini-2.5-pro` | Lento | Alto |
+
+### Como obter a chave
+
+1. Acesse [aistudio.google.com](https://aistudio.google.com)
+2. Faça login com sua conta Google
+3. Clique em **Get API key** → **Create API key**
+4. Copie a chave gerada e adicione no `.env`:
+
+```env
+GEMINI_API_KEY=sua_chave_aqui
+GEMINI_MODEL=gemini-3-flash-preview
+```
+
+> A chave é gratuita com limites de uso. Caso a cota seja atingida, o sistema faz fallback automático para classificação por palavras-chave sem interromper o serviço.
+
+### Fluxo de classificação
+
+![Diagrama de Classificação](./.github/assets/diagrama.png)
 
 ---
 
@@ -226,16 +259,16 @@ A API estará disponível em `http://localhost:3000`.
 
 **Scripts disponíveis:**
 
-| Script | Descrição |
-| --- | --- |
-| `npm run dev` | Inicia com hot reload |
-| `npm run build` | Compila TypeScript para `dist/` |
-| `npm start` | Inicia a versão compilada |
-| `npm test` | Roda todos os testes |
-| `npm run test:coverage` | Testes com relatório de cobertura |
-| `npm run prisma:migrate` | Cria e aplica migrations |
-| `npm run prisma:seed` | Popula o banco com dados de exemplo |
-| `npm run prisma:studio` | Abre o Prisma Studio (GUI do banco) |
+| Script                     | Descrição                         |
+| -------------------------- | ----------------------------------- |
+| `npm run dev`            | Inicia com hot reload               |
+| `npm run build`          | Compila TypeScript para`dist/`    |
+| `npm start`              | Inicia a versão compilada          |
+| `npm test`               | Roda todos os testes                |
+| `npm run test:coverage`  | Testes com relatório de cobertura  |
+| `npm run prisma:migrate` | Cria e aplica migrations            |
+| `npm run prisma:seed`    | Popula o banco com dados de exemplo |
+| `npm run prisma:studio`  | Abre o Prisma Studio (GUI do banco) |
 
 ### Frontend
 
@@ -279,17 +312,17 @@ O banco é populado automaticamente com dados de exemplo ao subir o projeto.
 
 **Tickets** — 9 tickets cobrindo todos os canais, prioridades e status:
 
-| Canal           | Prioridade | Status         | Mensagem                                    |
-| --------------- | ---------- | -------------- | ------------------------------------------- |
-| ouvidoria       | ALTA       | aberto         | "Fui assediado por um funcionário na loja" |
-| ouvidoria       | ALTA       | em_atendimento | "Detectei uma fraude na minha conta"        |
-| suporte_tecnico | MEDIA      | aberto         | "Não consigo fazer login no sistema"       |
-| suporte_tecnico | MEDIA      | resolvido      | "O sistema travou e não carrega"           |
-| financeiro      | MEDIA      | aberto         | "Recebi uma cobrança indevida"             |
-| financeiro      | MEDIA      | em_atendimento | "Quero solicitar reembolso"                 |
-| sac             | BAIXA      | aberto         | "Meu produto chegou com defeito"            |
-| sac             | BAIXA      | resolvido      | "Quero cancelar minha assinatura"           |
-| fora_do_escopo  | BAIXA      | aberto         | "Gostaria de saber mais sobre os serviços" |
+| Canal           | Prioridade | Status         | Mensagem                                                       |
+| --------------- | ---------- | -------------- | -------------------------------------------------------------- |
+| ouvidoria       | ALTA       | aberto         | "Fui assediado por um funcionário na loja ontem."             |
+| ouvidoria       | ALTA       | em_atendimento | "Detectei uma fraude na minha conta bancária."                |
+| suporte_tecnico | MEDIA      | aberto         | "Não consigo fazer login no sistema, aparece erro de acesso." |
+| suporte_tecnico | MEDIA      | resolvido      | "O sistema travou e não carrega a página principal."         |
+| financeiro      | MEDIA      | aberto         | "Recebi uma cobrança indevida no meu cartão de crédito."    |
+| financeiro      | MEDIA      | em_atendimento | "Quero solicitar reembolso de uma compra cancelada."           |
+| sac             | BAIXA      | aberto         | "Meu produto chegou com defeito, preciso de troca."            |
+| sac             | BAIXA      | resolvido      | "Quero cancelar minha assinatura do plano mensal."             |
+| fora_do_escopo  | BAIXA      | aberto         | "Olá, gostaria de saber mais sobre os serviços."             |
 
 ---
 
@@ -297,11 +330,12 @@ O banco é populado automaticamente com dados de exemplo ao subir o projeto.
 
 ### GET /health
 
-```http
-GET http://localhost:3000/health
+```bash
+curl http://localhost:3000/health
 ```
 
 **Resposta 200:**
+
 ```json
 { "status": "ok", "timestamp": "2024-01-01T00:00:00.000Z" }
 ```
@@ -310,18 +344,14 @@ GET http://localhost:3000/health
 
 ### POST /api/auth/register
 
-```http
-POST http://localhost:3000/api/auth/register
-Content-Type: application/json
-
-{
-  "name": "Lucas Silva",
-  "email": "lucas@email.com",
-  "password": "senha123"
-}
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Lucas Silva", "email": "lucas@email.com", "password": "senha123"}'
 ```
 
 **Resposta 201:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -333,17 +363,14 @@ Content-Type: application/json
 
 ### POST /api/auth/login
 
-```http
-POST http://localhost:3000/api/auth/login
-Content-Type: application/json
-
-{
-  "email": "admin@email.com",
-  "password": "senha123"
-}
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@email.com", "password": "senha123"}'
 ```
 
 **Resposta 200:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -355,12 +382,13 @@ Content-Type: application/json
 
 ### GET /api/auth/me
 
-```http
-GET http://localhost:3000/api/auth/me
-Authorization: Bearer <token>
+```bash
+curl http://localhost:3000/api/auth/me \
+  -H "Authorization: Bearer <token>"
 ```
 
 **Resposta 200:**
+
 ```json
 { "id": "uuid", "name": "Admin", "email": "admin@email.com", "createdAt": "2024-01-01T00:00:00.000Z" }
 ```
@@ -369,11 +397,12 @@ Authorization: Bearer <token>
 
 ### GET /api/users
 
-```http
-GET http://localhost:3000/api/users
+```bash
+curl http://localhost:3000/api/users
 ```
 
 **Resposta 200:**
+
 ```json
 [
   { "id": "uuid", "name": "Admin", "email": "admin@email.com" },
@@ -385,11 +414,12 @@ GET http://localhost:3000/api/users
 
 ### GET /api/users/:id
 
-```http
-GET http://localhost:3000/api/users/<id>
+```bash
+curl http://localhost:3000/api/users/<id>
 ```
 
 **Resposta 200:**
+
 ```json
 { "id": "uuid", "name": "Admin", "email": "admin@email.com", "createdAt": "2024-01-01T00:00:00.000Z" }
 ```
@@ -398,18 +428,14 @@ GET http://localhost:3000/api/users/<id>
 
 ### POST /api/users
 
-```http
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": "Maria Souza",
-  "email": "maria@email.com",
-  "password": "senha123"
-}
+```bash
+curl -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Maria Souza", "email": "maria@email.com", "password": "senha123"}'
 ```
 
 **Resposta 201:**
+
 ```json
 { "id": "uuid", "name": "Maria Souza", "email": "maria@email.com", "createdAt": "2024-01-01T00:00:00.000Z" }
 ```
@@ -418,16 +444,14 @@ Content-Type: application/json
 
 ### PUT /api/users/:id
 
-```http
-PUT http://localhost:3000/api/users/<id>
-Content-Type: application/json
-
-{
-  "name": "Maria Souza Atualizada"
-}
+```bash
+curl -X PUT http://localhost:3000/api/users/<id> \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Maria Souza Atualizada"}'
 ```
 
 **Resposta 200:**
+
 ```json
 { "id": "uuid", "name": "Maria Souza Atualizada", "email": "maria@email.com" }
 ```
@@ -436,12 +460,13 @@ Content-Type: application/json
 
 ### GET /api/tickets
 
-```http
-GET http://localhost:3000/api/tickets
-Authorization: Bearer <token>
+```bash
+curl http://localhost:3000/api/tickets \
+  -H "Authorization: Bearer <token>"
 ```
 
 **Resposta 200:**
+
 ```json
 [
   {
@@ -459,12 +484,13 @@ Authorization: Bearer <token>
 
 ### GET /api/tickets/:id
 
-```http
-GET http://localhost:3000/api/tickets/<id>
-Authorization: Bearer <token>
+```bash
+curl http://localhost:3000/api/tickets/<id> \
+  -H "Authorization: Bearer <token>"
 ```
 
 **Resposta 200:**
+
 ```json
 {
   "id": "uuid",
@@ -481,17 +507,15 @@ Authorization: Bearer <token>
 
 ### POST /api/tickets
 
-```http
-POST http://localhost:3000/api/tickets
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "message": "Não consigo fazer login no sistema, aparece erro de acesso"
-}
+```bash
+curl -X POST http://localhost:3000/api/tickets \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Não consigo fazer login no sistema, aparece erro de acesso"}'
 ```
 
 **Resposta 201:**
+
 ```json
 {
   "id": "uuid",
@@ -508,17 +532,15 @@ Content-Type: application/json
 
 ### PATCH /api/tickets/:id/status
 
-```http
-PATCH http://localhost:3000/api/tickets/<id>/status
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "status": "em_atendimento"
-}
+```bash
+curl -X PATCH http://localhost:3000/api/tickets/<id>/status \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "em_atendimento"}'
 ```
 
 **Resposta 200:**
+
 ```json
 {
   "id": "uuid",
@@ -536,33 +558,15 @@ Status válidos: `aberto`, `em_atendimento`, `resolvido`
 
 Ao criar um ticket, o sistema classifica automaticamente a mensagem em um canal e define a prioridade.
 
-**Fluxo:**
-
-```
-POST /api/tickets { message }
-        ↓
-ClassificationService.classify(message)
-        ↓
-   Tenta Google Gemini
-        ↓
-  Gemini disponível?
-   ↙ sim      ↘ não
-Retorna      Fallback por
-channel +    palavras-chave
-priority
-        ↓
-Salva ticket com channel + priority
-```
-
 **Tabela de classificação:**
 
-| Canal               | Prioridade | Exemplos de mensagem                                            |
-| ------------------- | ---------- | --------------------------------------------------------------- |
-| `ouvidoria`       | ALTA       | Denúncia, assédio, fraude, abuso, discriminação, violência |
-| `suporte_tecnico` | MEDIA      | Erro, bug, login, senha, sistema travado, conta bloqueada       |
-| `financeiro`      | MEDIA      | Cobrança, pagamento, reembolso, boleto, estorno                |
-| `sac`             | BAIXA      | Produto, entrega, pedido, troca, devolução, assinatura        |
-| `fora_do_escopo`  | BAIXA      | Mensagens vagas ou sem contexto claro                           |
+| Canal               | Prioridade | Exemplos de mensagem                                |
+| ------------------- | ---------- | --------------------------------------------------- |
+| `ouvidoria`       | ALTA       | Denúncia, assédio, fraude, abuso, discriminação |
+| `sac`             | BAIXA      | Problemas com produto, entrega ou assinatura        |
+| `suporte_tecnico` | MEDIA      | Erro de acesso, bug ou indisponibilidade do sistema |
+| `financeiro`      | MEDIA      | Cobrança indevida ou solicitação de reembolso    |
+| `fora_do_escopo`  | BAIXA      | Mensagem vaga ou sem contexto claro                 |
 
 ---
 
@@ -725,15 +729,18 @@ O `migrate deploy` aplica apenas migrations já existentes, sem criar novas — 
 
 ### Arquitetura AWS resultante
 
-```
-Internet
-    ↓
-  ALB (Application Load Balancer)
-    ↓
-ECS Fargate (triagem-api)
-    ↓              ↓
-  RDS          Secrets Manager
-(PostgreSQL)   (variáveis de ambiente)
-```
+![Arquitetura AWS](./.github/assets/arquitetura-AWS.png)
 
 > Para um ambiente de produção completo, considere adicionar CloudFront para o frontend, Route 53 para DNS e Certificate Manager para HTTPS.
+
+---
+
+## Autor
+
+Feito por **cicero-lucas** — [github.com/cicero-lucas](https://github.com/cicero-lucas)
+
+---
+
+## Licença
+
+Este projeto está licenciado sob a [MIT License](./LICENSE).
