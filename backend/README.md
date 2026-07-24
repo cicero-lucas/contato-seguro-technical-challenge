@@ -71,3 +71,5 @@ backend/
 **NODE_ENV=test** — Desativa o logger HTTP do Pino durante os testes para manter o output limpo.
 
 **Prisma seed** — Dados de exemplo populados automaticamente no startup do container, facilitando avaliação e testes manuais.
+
+**Prisma 6 (não 7)** — O projeto usa Prisma v6 intencionalmente. O Prisma 7 foi lançado recentemente e introduz breaking changes significativos: a configuração via `package.json#prisma` foi removida em favor de um arquivo `prisma.config.ts`, e diversas APIs internas foram alteradas. Como o v7 ainda é muito recente e o ecossistema de integrações (Jest, ts-node-dev, Docker) ainda não foi amplamente validado com ele, optou-se pelo v6 por ser estável, maduro e sem riscos de regressão durante o desenvolvimento deste projeto.

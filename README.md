@@ -4,7 +4,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
-![Jest](https://img.shields.io/badge/Tests-55%20passed-C21325?logo=jest&logoColor=white)
+![Jest](<https://img.shields.io/badge/Tests-55%20passed-C21325?logo=jest&logoColor=white>)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 API REST para triagem de atendimentos com classificação automática de tickets por Inteligência Artificial (Google Gemini) e fallback inteligente por palavras-chave.
@@ -37,7 +37,7 @@ API REST para triagem de atendimentos com classificação automática de tickets
 
 O sistema permite que usuários autenticados abram tickets de atendimento enviando uma mensagem de texto. A mensagem é automaticamente classificada em um canal (`ouvidoria`, `suporte_tecnico`, `financeiro`, `sac`, `fora_do_escopo`) e recebe uma prioridade (`ALTA`, `MEDIA`, `BAIXA`) via Google Gemini. Caso a IA esteja indisponível, um fallback por palavras-chave garante que a classificação sempre ocorra.
 
-![Demonstração da aplicação](./.github/assets/demo.gif)
+<img src="./.github/assets/demo.gif" width="800" alt="Demonstração da aplicação">
 
 ---
 
@@ -65,7 +65,7 @@ O sistema permite que usuários autenticados abram tickets de atendimento envian
 
 O projeto segue arquitetura em camadas com Repository Pattern e princípios SOLID.
 
-![Arquitetura do Projeto](./.github/assets/arquitetura_projeto.png)
+<img src="./.github/assets/arquitetura_projeto.png" width="750" alt="Arquitetura do Projeto">
 
 ---
 
@@ -146,11 +146,11 @@ O sistema utiliza a **Google Gemini API** para classificar automaticamente as me
 
 Por padrão o modelo configurado é o `gemini-3-flash-preview`, definido via variável de ambiente `GEMINI_MODEL`. Você pode trocar para qualquer modelo disponível na sua chave sem alterar o código.
 
-| Modelo | Velocidade | Custo |
-| --- | --- | --- |
-| `gemini-3-flash-preview` | Rápido | Baixo |
-| `gemini-2.0-flash` | Rápido | Baixo |
-| `gemini-2.5-pro` | Lento | Alto |
+| Modelo                     | Velocidade | Custo |
+| -------------------------- | ---------- | ----- |
+| `gemini-3-flash-preview` | Rápido    | Baixo |
+| `gemini-2.0-flash`       | Rápido    | Baixo |
+| `gemini-2.5-pro`         | Lento      | Alto  |
 
 ### Como obter a chave
 
@@ -168,7 +168,7 @@ GEMINI_MODEL=gemini-3-flash-preview
 
 ### Fluxo de classificação
 
-![Diagrama de Classificação](./.github/assets/diagrama.png)
+<img src="./.github/assets/diagrama.png" width="700" alt="Diagrama de Classificação">
 
 ---
 
@@ -574,17 +574,22 @@ Ao criar um ticket, o sistema classifica automaticamente a mensagem em um canal 
 
 Os testes de integração requerem o PostgreSQL rodando.
 
+> **Importante:** os scripts do backend carregam o `.env` da raiz automaticamente via `dotenv-cli`. Não é necessário criar um `.env` dentro de `backend/`. Use sempre `npm run prisma:migrate` e não `npx prisma migrate dev` diretamente.
+
 ```bash
-# Na raiz, suba o banco
+# 1. Na raiz, suba o banco
 docker compose up -d postgres
 
-# Entre no backend
+# 2. Entre no backend
 cd backend
 
-# Aplique as migrations
+# 3. Instale as dependências (se ainda não fez)
+npm install
+
+# 4. Aplique as migrations (carrega .env da raiz automaticamente)
 npm run prisma:migrate
 
-# Rode todos os testes
+# 5. Rode todos os testes
 npm test
 
 # Com relatório de cobertura
@@ -729,7 +734,7 @@ O `migrate deploy` aplica apenas migrations já existentes, sem criar novas — 
 
 ### Arquitetura AWS resultante
 
-![Arquitetura AWS](./.github/assets/arquitetura-AWS.png)
+<img src="./.github/assets/arquitetura-AWS.png" width="750" alt="Arquitetura AWS">
 
 > Para um ambiente de produção completo, considere adicionar CloudFront para o frontend, Route 53 para DNS e Certificate Manager para HTTPS.
 
