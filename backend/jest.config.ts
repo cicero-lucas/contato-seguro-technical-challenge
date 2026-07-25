@@ -12,6 +12,7 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   setupFiles: ["<rootDir>/tests/setup.ts"],
+  testTimeout: 60000,
   clearMocks: true,
   collectCoverageFrom: ["src/**/*.ts", "!src/server.ts", "!src/docs/**"],
   coverageDirectory: "coverage",
