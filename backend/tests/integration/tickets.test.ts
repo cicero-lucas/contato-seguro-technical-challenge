@@ -1,6 +1,15 @@
 import request from "supertest";
 import app from "../../src/app";
 import prisma from "../../src/config/prisma";
+import { ClassificationService } from "../../src/services/ClassificationService";
+
+jest.spyOn(ClassificationService.prototype, "classify").mockImplementation(async (message: string) => {
+  const m = message.toLowerCase();
+  if (m.includes("fraude") || m.includes("denúncia") || m.includes("denuncia")) return { channel: "ouvidoria", priority: "ALTA" };
+  if (m.includes("cobrança") || m.includes("cobranca")) return { channel: "financeiro", priority: "MEDIA" };
+  if (m.includes("defeito") || m.includes("entrega")) return { channel: "sac", priority: "BAIXA" };
+  return { channel: "suporte_tecnico", priority: "MEDIA" };
+});
 
 const baseUrl = "/api/tickets";
 
